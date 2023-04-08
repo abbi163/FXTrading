@@ -11,3 +11,6 @@
 **Templates:** This folder can contain subfolders for different grid trading templates that traders can use as a starting point for their own strategies.
 
 **Tools:** This folder can contain subfolders for different tools and utilities used in the grid trading strategies, such as risk management calculators, position sizing tools, and trade loggers.
+
+**Vault:** This folder contains all the EA created and it's versions
+
