@@ -1,6 +1,6 @@
 
 #property copyright "Alpha Grid LTD"
-#property version   "0.004"
+#property version   "0.005"
 #property strict
 
 
@@ -10,7 +10,7 @@ extern double gMaxSlippage = 10;       // Maximum slippage allowed while opening
 extern double gTakeProfit = 100;        // Set the take profit in points
 extern double gStopLoss = 10000;       // Set the stop loss in points
 extern double gMagicNumber = 123;      // Magic number for opening the trade
-extern string gOrderSendComment = "AlphaGrid V 0.004" ;    // Order Comment 
+extern string gOrderSendComment = "AlphaGrid V 0.005" ;    // Order Comment 
 extern int gMaxOrders = 18;            // Maximum allowed Open Order
 extern double gDrawdown = 1;           // allowed drawdown in percentage !!
 extern double gGridStep = 70;          // Grid Steps in Points !!
@@ -23,6 +23,9 @@ extern int RSI_DOWN_Level = 30 ; // RSI down level for opening buy trade
 extern string BB_Parameters = "Select Timeframe and Period for Bollinger Band " ;  // Select Bollinger Band Parameters
 extern  ENUM_TIMEFRAMES  BB_TimeFrame = 15 ;
 extern int BB_Period = 14 ;
+
+
+int gDecimalDigits ;
 
 class CTrade {
 private:
@@ -82,7 +85,7 @@ CTrade Trade(gLotSize, gMaxSlippage, gTakeProfit, gStopLoss, gMagicNumber, gOrde
 
 int OnInit()
   {
-
+   gDecimalDigits = Digits() ;
    return(INIT_SUCCEEDED);
   }
   
@@ -132,26 +135,13 @@ void OnTick()
          // double z = x - y ;
          
          // Comment(StringFormat("Last Order Open price :  %G , Ask Price: %G , Diff : % G",x, y, z * Point));
-         
-         double avgOpenPrice = testModifyTP(lastOrderType,  gTakeProfit, gMagicNumber);
-         Comment(StringFormat("Average Open price :  %G", avgOpenPrice));
-         
-         
          // --------------------------------------------------
       } 
-       
-
-       
-   
        
       // Check drawdown and close if function return true. 
       bool dd = CheckDrawdown(gDrawdown);
       if (dd == true) CloseOrders();
-      
-   
-
-          
-       
+ 
     }
   }
 
@@ -324,10 +314,6 @@ void GridOpen(int lastOrderType, double lastOpenPrice)
 
 
 
-
-// TODO : --------------------------------------------------------------------------------------------------
-// IN MODIFY TP, Modification is not happening ! Fix that . 
-
 void ModifyTP(int orderType, double TakeProfit, double magicNumber)
 {  
    RefreshRates();
@@ -357,7 +343,7 @@ void ModifyTP(int orderType, double TakeProfit, double magicNumber)
       if (orderType == 1)
          { newTakeProfit =  averageOpenPrice - TakeProfit * Point ; }
    
-    
+    newTakeProfit = NormalizeDouble(newTakeProfit, gDecimalDigits) ;
     
     for (int i = OrdersTotal() - 1; i >= 0; i--)
        {
@@ -367,7 +353,7 @@ void ModifyTP(int orderType, double TakeProfit, double magicNumber)
              {  
              
                 RefreshRates();
-                bool result = OrderModify(OrderTicket(), OrderOpenPrice(), newTakeProfit, OrderStopLoss(), OrderExpiration(), 0);
+                bool result = OrderModify(OrderTicket(), OrderOpenPrice(), OrderStopLoss(), newTakeProfit, 0, Blue);
                 if (result == false)
                 {
                    Print("Error modifying take profit for order ", OrderTicket(), ": ", GetLastError());
@@ -378,52 +364,3 @@ void ModifyTP(int orderType, double TakeProfit, double magicNumber)
 }
 
 
-// ---------------------------------------------- TO DELETE THE FUNCTION BELOW --------------------- JUST FOR TESTING PURPOSE//---
-
-double testModifyTP(int orderType, double TakeProfit, double magicNumber)
-{
-   double totalOpenPrice = 0.0;
-   int numOrders = 0;
-   double newTakeProfit ;
-   
-   for (int pos = OrdersTotal() - 1; pos >= 0; pos--)
-   {
-      if (OrderSelect(pos, SELECT_BY_POS, MODE_TRADES))
-      {
-         if (OrderMagicNumber() == magicNumber && OrderType() == orderType && OrderSymbol() == Symbol())
-         {
-            totalOpenPrice += OrderOpenPrice();
-            numOrders++;
-         }
-      }
-   }
-   
-
-      double averageOpenPrice = totalOpenPrice / numOrders;
-      
-      if (orderType == 0)
-          { newTakeProfit =  averageOpenPrice + TakeProfit * Point ; }
-      
-      if (orderType == 1)
-         { newTakeProfit =  averageOpenPrice - TakeProfit * Point ; }
-      
-      
-      
-      for (int i = OrdersTotal() - 1; i >= 0; i--)
-       {
-          if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
-          {
-             if (OrderMagicNumber() == magicNumber && OrderType() == orderType && OrderSymbol() == Symbol())
-             {  
-             
-                Print("Order Parametes ", OrderMagicNumber(), ": ", OrderType(), " : ", OrderSymbol());
-                
-             }
-          }
-       }
-      
-      
-      
-      return newTakeProfit ;
-}
-//----------------------------------------- to delete the above function !!

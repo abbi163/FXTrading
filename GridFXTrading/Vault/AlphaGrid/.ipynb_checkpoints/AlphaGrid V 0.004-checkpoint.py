@@ -1,6 +1,6 @@
 
 #property copyright "Alpha Grid LTD"
-#property version   "0.003"
+#property version   "0.004"
 #property strict
 
 
@@ -10,7 +10,7 @@ extern double gMaxSlippage = 10;       // Maximum slippage allowed while opening
 extern double gTakeProfit = 100;        // Set the take profit in points
 extern double gStopLoss = 10000;       // Set the stop loss in points
 extern double gMagicNumber = 123;      // Magic number for opening the trade
-extern string gOrderSendComment = "AlphaGrid V 0.003" ;    // Order Comment 
+extern string gOrderSendComment = "AlphaGrid V 0.004" ;    // Order Comment 
 extern int gMaxOrders = 18;            // Maximum allowed Open Order
 extern double gDrawdown = 1;           // allowed drawdown in percentage !!
 extern double gGridStep = 70;          // Grid Steps in Points !!
